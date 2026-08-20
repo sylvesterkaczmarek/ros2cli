@@ -147,6 +147,12 @@ def _show_interface(
     is_show_nested_comments: bool = False,
     indent_level: int = 0
 ):
+    file_path = get_interface_path(interface_identifier)
+    if file_path.endswith('.idl'):
+        with open(file_path) as file_handler:
+            sys.stdout.write(file_handler.read())
+        return
+
     for line in _get_interface_lines(interface_identifier):
 
         _print_interface_line(
