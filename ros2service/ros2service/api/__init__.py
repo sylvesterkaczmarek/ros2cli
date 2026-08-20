@@ -52,8 +52,8 @@ def get_service_class(node: Node, service_name: str, include_hidden_services: bo
 
     # get_service_names_and_types() returns a list of lists, like the following:
     #  [
-    #    ['/service1', ['service/srv/Type1]],
-    #    ['/service2', ['service/srv/Type2]],
+    #    ['/service1', ['service/srv/Type1']],
+    #    ['/service2', ['service/srv/Type2']],
     #  ]
     #
     # If there are more than one server for a service with the same type, that is only represented
@@ -140,4 +140,5 @@ class ServicePrototypeCompleter:
 
     def __call__(self, prefix, parsed_args, **kwargs):
         service = get_service(getattr(parsed_args, self.service_type_key))
-        return [message_to_yaml(service.Request())]
+        yaml_snippet = "'" + message_to_yaml(service.Request()) + "'"
+        return [yaml_snippet]

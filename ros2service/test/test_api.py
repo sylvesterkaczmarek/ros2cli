@@ -125,4 +125,4 @@ def test_service_prototype_completer():
 
             mock_get_service.assert_called_once_with('std_srvs/SetBool')
             mock_message_to_yaml.assert_called_once_with(mock_request_instance)
-            assert result == ['data: false']
+            assert result == ["'data: false'"]
