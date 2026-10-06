@@ -1,4 +1,17 @@
-"""Windows TCP and real ROS daemon validation. No ROS dependency stubs."""
+# Copyright 2026 Sylvester Kaczmarek
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import argparse
 from contextlib import contextmanager
 import os
@@ -89,12 +102,16 @@ def test_live_xmlrpc_daemon_is_not_replaced():
 
 def test_real_daemon_restarts_after_inactivity():
     args = argparse.Namespace()
-    print('RMW', rclpy.get_rmw_implementation_identifier())
+    assert rclpy.get_rmw_implementation_identifier()
     try:
         for _ in range(3):
-            assert daemon_node.spawn_daemon(args, timeout=10.0, debug=True, inactivity_timeout=0.2)
-            # Querying a live daemon resets its inactivity timer, so do not poll it.
-            time.sleep(0.7)
-            assert not daemon_node.is_daemon_running(args)
+            assert daemon_node.spawn_daemon(
+                args, timeout=10.0, debug=True, inactivity_timeout=1.0)
+            # spawn_daemon waits for unpickling, not for ROS node initialisation.
+            assert daemon_node.wait_for(
+                lambda: daemon_node.is_daemon_running(args, timeout=0.2), 10.0)
+            # Introspection does not reset the daemon's inactivity timer.
+            assert daemon_node.wait_for(
+                lambda: not daemon_node.is_daemon_running(args, timeout=0.2), 10.0)
     finally:
         daemon_node.shutdown_daemon(args, timeout=10.0)
