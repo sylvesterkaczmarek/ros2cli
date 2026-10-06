@@ -110,8 +110,9 @@ def test_real_daemon_restarts_after_inactivity():
             # spawn_daemon waits for unpickling, not for ROS node initialisation.
             assert daemon_node.wait_for(
                 lambda: daemon_node.is_daemon_running(args, timeout=0.2), 10.0)
-            # Introspection does not reset the daemon's inactivity timer.
+            # Allow an idle server poll between probes so handle_timeout runs.
             assert daemon_node.wait_for(
-                lambda: not daemon_node.is_daemon_running(args, timeout=0.2), 10.0)
+                lambda: not daemon_node.is_daemon_running(args, timeout=0.2),
+                10.0, period=0.3)
     finally:
         daemon_node.shutdown_daemon(args, timeout=10.0)
